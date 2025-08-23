@@ -8,7 +8,7 @@ export default function Home() {
         <Image
           className={styles.logo}
           src="/next.svg"
-          alt="Next.js logo"
+          alt="Elementle Logo"
           width={180}
           height={38}
           priority
