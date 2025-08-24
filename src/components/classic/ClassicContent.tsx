@@ -1,10 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Box, Text, ActionIcon, Flex, Autocomplete } from "@mantine/core";
+import { useState, useEffect, useCallback } from "react";
+import {
+  Box,
+  Text,
+  ActionIcon,
+  Flex,
+  Autocomplete,
+  OptionsFilter,
+} from "@mantine/core";
 import { ChemicalElement, GuessResult } from "@/types/element";
-import { getRandomElement, findElementByName, elements } from "@/data/elements";
+import { findElementByName, elements } from "@/data/elements";
+import { getDailyElement } from "@/lib/dailyElementService";
 import { FaArrowRight } from "react-icons/fa";
+import {
+  formatProperty,
+  formatValue,
+  getStatusColor,
+} from "@/utils/ClassicUtils";
+import { compareElements } from "@/utils/elementUtils";
+import { normalizeText } from "@/utils/textUtils";
 
 export default function ClassicContent() {
   const [targetElement, setTargetElement] = useState<ChemicalElement | null>(
@@ -16,74 +31,32 @@ export default function ClassicContent() {
   >([]);
   const [gameWon, setGameWon] = useState(false);
 
-  useEffect(() => {
-    setTargetElement(getRandomElement());
+  const loadDailyElement = useCallback(async () => {
+    const dailyElement = await getDailyElement();
+    if (dailyElement) {
+      setTargetElement(dailyElement);
+    } else {
+      console.error("Failed to load daily element");
+    }
   }, []);
 
-  const compareElements = (
-    guessedElement: ChemicalElement,
-    target: ChemicalElement
-  ): GuessResult[] => {
-    const results: GuessResult[] = [];
+  useEffect(() => {
+    loadDailyElement();
+  }, [loadDailyElement]);
 
-    // Family comparison
-    results.push({
-      property: "family",
-      status: guessedElement.family === target.family ? "correct" : "wrong",
-    });
-
-    // Physical state comparison
-    results.push({
-      property: "physicalState",
-      status:
-        guessedElement.physicalState === target.physicalState
-          ? "correct"
-          : "wrong",
-    });
-
-    // Atomic number comparison
-    if (guessedElement.atomicNumber === target.atomicNumber) {
-      results.push({
-        property: "atomicNumber",
-        status: "correct",
-      });
-    } else {
-      results.push({
-        property: "atomicNumber",
-        status: "wrong",
-        direction:
-          guessedElement.atomicNumber < target.atomicNumber
-            ? "higher"
-            : "lower",
-      });
-    }
-
-    // Discovery year comparison
-    if (guessedElement.discoveryYear === target.discoveryYear) {
-      results.push({
-        property: "discoveryYear",
-        status: "correct",
-      });
-    } else {
-      results.push({
-        property: "discoveryYear",
-        status: "wrong",
-        direction:
-          guessedElement.discoveryYear < target.discoveryYear
-            ? "higher"
-            : "lower",
-      });
-    }
-
-    return results;
-  };
-
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (!guess.trim() || !targetElement) return;
 
     const guessedElement = findElementByName(guess.trim());
     if (!guessedElement) {
-      alert("Elemento não encontrado! Tente novamente.");
+      return;
+    }
+
+    const alreadyGuessed = guesses.some(
+      (guess) => guess.element.name === guessedElement.name
+    );
+    if (alreadyGuessed) {
+      setGuess("");
       return;
     }
 
@@ -97,60 +70,17 @@ export default function ClassicContent() {
     }
 
     setGuess("");
-  };
+  }, [guess, targetElement, guesses]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "correct":
-        return "#22c55e";
-      case "partial":
-        return "#eab308";
-      case "wrong":
-        return "#ef4444";
-      default:
-        return "#6b7280";
-    }
-  };
-
-  const formatProperty = (property: string) => {
-    switch (property) {
-      case "family":
-        return "Família";
-      case "physicalState":
-        return "Estado Físico";
-      case "atomicNumber":
-        return "Número Atômico";
-      case "discoveryYear":
-        return "Ano de Descoberta";
-      default:
-        return property;
-    }
-  };
-
-  const formatValue = (property: string, value: string | number) => {
-    switch (property) {
-      case "family":
-        const familyNames: { [key: string]: string } = {
-          metal: "Metal",
-          "non-metal": "Não-metal",
-          "noble-gas": "Gás Nobre",
-          halogen: "Halogênio",
-        };
-        return familyNames[value] || value;
-      case "physicalState":
-        const stateNames: { [key: string]: string } = {
-          solid: "Sólido",
-          liquid: "Líquido",
-          gas: "Gasoso",
-        };
-        return stateNames[value] || value;
-      case "discoveryYear":
-        return typeof value === "number" && value < 0
-          ? `${Math.abs(value)} a.C.`
-          : value.toString();
-      default:
-        return value.toString();
-    }
+  const optionsFilter: OptionsFilter = ({ options, search }) => {
+    const normalizedSearch = normalizeText(search);
+    return options.filter((option) => {
+      if ("label" in option) {
+        const normalizedOption = normalizeText(option.label);
+        return normalizedOption.includes(normalizedSearch);
+      }
+      return false;
+    });
   };
 
   return (
@@ -188,9 +118,17 @@ export default function ClassicContent() {
                 onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
                 data={
                   guess.trim().length > 0
-                    ? elements.map((element) => element.name)
+                    ? elements
+                        .filter(
+                          (element) =>
+                            !guesses.some(
+                              (guess) => guess.element.name === element.name
+                            )
+                        )
+                        .map((element) => element.name)
                     : []
                 }
+                filter={optionsFilter}
                 limit={5}
                 w="280px"
                 styles={{
@@ -335,13 +273,13 @@ export default function ClassicContent() {
                   <Text size="sm" c="white">
                     {formatValue(
                       result.property,
-                      result.property === "family"
-                        ? guessItem.element.family
-                        : result.property === "physicalState"
-                        ? guessItem.element.physicalState
-                        : result.property === "atomicNumber"
-                        ? guessItem.element.atomicNumber
-                        : guessItem.element.discoveryYear
+                      result.property === "group_name"
+                        ? guessItem.element.group_name
+                        : result.property === "state_ntp"
+                        ? guessItem.element.state_ntp
+                        : result.property === "atomic_number"
+                        ? guessItem.element.atomic_number
+                        : guessItem.element.discovery_year
                     )}
                   </Text>
                   {result.direction && (

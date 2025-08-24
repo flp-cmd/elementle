@@ -1,10 +1,12 @@
 export interface ChemicalElement {
   name: string;
   symbol: string;
-  atomicNumber: number;
-  family: string;
-  physicalState: string;
-  discoveryYear: number;
+  atomic_number: number;
+  group_name: string;
+  state_ntp: string;
+  discovery_year: number | string;
+  applications: string;
+  trivia: string[];
 }
 
 export interface GuessResult {
