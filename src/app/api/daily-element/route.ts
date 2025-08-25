@@ -76,30 +76,22 @@ export async function GET(request: Request) {
     // Debug Firebase environment variables
     console.log("Firebase Admin Environment Variables Debug:");
     console.log(
-      "SECRET_FIREBASE_SERVICE_ACCOUNT_BASE64:",
-      process.env.SECRET_FIREBASE_SERVICE_ACCOUNT_BASE64
-        ? "✅ Set"
-        : "❌ Missing"
-    );
-    console.log(
-      "SECRET_FIREBASE_PROJECT_ID:",
-      process.env.SECRET_FIREBASE_PROJECT_ID ? "✅ Set" : "❌ Missing"
+      "SECRET_FIREBASE_SERVICE_ACCOUNT_JSON:",
+      process.env.SECRET_FIREBASE_SERVICE_ACCOUNT_JSON ? "✅ Set" : "❌ Missing"
     );
 
-    // Test base64 decoding
-    if (process.env.SECRET_FIREBASE_SERVICE_ACCOUNT_BASE64) {
+    // Test JSON parsing
+    if (process.env.SECRET_FIREBASE_SERVICE_ACCOUNT_JSON) {
       try {
         const decoded = JSON.parse(
-          Buffer.from(
-            process.env.SECRET_FIREBASE_SERVICE_ACCOUNT_BASE64,
-            "base64"
-          ).toString()
+          process.env.SECRET_FIREBASE_SERVICE_ACCOUNT_JSON
         );
-        console.log("Base64 decode success:", !!decoded);
+        console.log("JSON parse success:", !!decoded);
         console.log("Has private_key:", !!decoded.private_key);
         console.log("Private key length:", decoded.private_key?.length);
+        console.log("Project ID:", decoded.project_id);
       } catch (error) {
-        console.log("Base64 decode error:", error);
+        console.log("JSON parse error:", error);
       }
     }
 
