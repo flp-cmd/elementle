@@ -76,29 +76,32 @@ export async function GET(request: Request) {
     // Debug Firebase environment variables
     console.log("Firebase Admin Environment Variables Debug:");
     console.log(
+      "SECRET_FIREBASE_SERVICE_ACCOUNT_BASE64:",
+      process.env.SECRET_FIREBASE_SERVICE_ACCOUNT_BASE64
+        ? "✅ Set"
+        : "❌ Missing"
+    );
+    console.log(
       "SECRET_FIREBASE_PROJECT_ID:",
       process.env.SECRET_FIREBASE_PROJECT_ID ? "✅ Set" : "❌ Missing"
     );
-    console.log(
-      "SECRET_FIREBASE_PRIVATE_KEY_ID:",
-      process.env.SECRET_FIREBASE_PRIVATE_KEY_ID ? "✅ Set" : "❌ Missing"
-    );
-    console.log(
-      "SECRET_FIREBASE_PRIVATE_KEY:",
-      process.env.SECRET_FIREBASE_PRIVATE_KEY ? "✅ Set" : "❌ Missing"
-    );
-    console.log(
-      "SECRET_FIREBASE_CLIENT_EMAIL:",
-      process.env.SECRET_FIREBASE_CLIENT_EMAIL ? "✅ Set" : "❌ Missing"
-    );
-    console.log(
-      "SECRET_FIREBASE_CLIENT_ID:",
-      process.env.SECRET_FIREBASE_CLIENT_ID ? "✅ Set" : "❌ Missing"
-    );
-    console.log(
-      "SECRET_FIREBASE_CLIENT_X509_CERT_URL:",
-      process.env.SECRET_FIREBASE_CLIENT_X509_CERT_URL ? "✅ Set" : "❌ Missing"
-    );
+
+    // Test base64 decoding
+    if (process.env.SECRET_FIREBASE_SERVICE_ACCOUNT_BASE64) {
+      try {
+        const decoded = JSON.parse(
+          Buffer.from(
+            process.env.SECRET_FIREBASE_SERVICE_ACCOUNT_BASE64,
+            "base64"
+          ).toString()
+        );
+        console.log("Base64 decode success:", !!decoded);
+        console.log("Has private_key:", !!decoded.private_key);
+        console.log("Private key length:", decoded.private_key?.length);
+      } catch (error) {
+        console.log("Base64 decode error:", error);
+      }
+    }
 
     // Validate API key
     if (!validateApiKey(request)) {
