@@ -73,6 +73,28 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
+    // Debug Firebase environment variables
+    console.log("Firebase Admin Environment Variables Debug:");
+    console.log(
+      "SECRET_FIREBASE_SERVICE_ACCOUNT_JSON:",
+      process.env.SECRET_FIREBASE_SERVICE_ACCOUNT_JSON ? "✅ Set" : "❌ Missing"
+    );
+
+    // Test JSON parsing
+    if (process.env.SECRET_FIREBASE_SERVICE_ACCOUNT_JSON) {
+      try {
+        const decoded = JSON.parse(
+          process.env.SECRET_FIREBASE_SERVICE_ACCOUNT_JSON
+        );
+        console.log("JSON parse success:", !!decoded);
+        console.log("Has private_key:", !!decoded.private_key);
+        console.log("Private key length:", decoded.private_key?.length);
+        console.log("Project ID:", decoded.project_id);
+      } catch (error) {
+        console.log("JSON parse error:", error);
+      }
+    }
+
     // Validate API key
     if (!validateApiKey(request)) {
       return NextResponse.json(

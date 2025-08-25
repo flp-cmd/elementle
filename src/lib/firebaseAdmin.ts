@@ -1,20 +1,31 @@
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 
-// Initialize Firebase Admin SDK with environment variables for Vercel deployment
-const serviceAccount = {
-  type: "service_account",
-  project_id: process.env.SECRET_FIREBASE_PROJECT_ID,
-  private_key_id: process.env.SECRET_FIREBASE_PRIVATE_KEY_ID,
-  private_key: process.env.SECRET_FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-  client_email: process.env.SECRET_FIREBASE_CLIENT_EMAIL,
-  client_id: process.env.SECRET_FIREBASE_CLIENT_ID,
-  auth_uri: "https://accounts.google.com/o/oauth2/auth",
-  token_uri: "https://oauth2.googleapis.com/token",
-  auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
-  client_x509_cert_url: process.env.SECRET_FIREBASE_CLIENT_X509_CERT_URL,
-  universe_domain: "googleapis.com",
-};
+// Check if the Firebase service account JSON environment variable is set
+if (!process.env.SECRET_FIREBASE_SERVICE_ACCOUNT_JSON) {
+  throw new Error(
+    "SECRET_FIREBASE_SERVICE_ACCOUNT_JSON environment variable is not set"
+  );
+}
+
+const serviceAccount = JSON.parse(
+  process.env.SECRET_FIREBASE_SERVICE_ACCOUNT_JSON
+);
+
+// Debug: Check if private_key exists and has proper format
+console.log("Service Account Debug:");
+console.log("Has private_key:", !!serviceAccount.private_key);
+console.log(
+  "Private key starts with:",
+  serviceAccount.private_key?.substring(0, 30)
+);
+console.log("Private key ends with:", serviceAccount.private_key?.slice(-30));
+console.log("Private key length:", serviceAccount.private_key?.length);
+
+// Fix private_key format if needed (replace escaped newlines with actual newlines)
+if (serviceAccount.private_key) {
+  serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
+}
 
 const app =
   getApps().length === 0
