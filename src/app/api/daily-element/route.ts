@@ -73,6 +73,33 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
+    // Debug Firebase environment variables
+    console.log("Firebase Admin Environment Variables Debug:");
+    console.log(
+      "SECRET_FIREBASE_PROJECT_ID:",
+      process.env.SECRET_FIREBASE_PROJECT_ID ? "✅ Set" : "❌ Missing"
+    );
+    console.log(
+      "SECRET_FIREBASE_PRIVATE_KEY_ID:",
+      process.env.SECRET_FIREBASE_PRIVATE_KEY_ID ? "✅ Set" : "❌ Missing"
+    );
+    console.log(
+      "SECRET_FIREBASE_PRIVATE_KEY:",
+      process.env.SECRET_FIREBASE_PRIVATE_KEY ? "✅ Set" : "❌ Missing"
+    );
+    console.log(
+      "SECRET_FIREBASE_CLIENT_EMAIL:",
+      process.env.SECRET_FIREBASE_CLIENT_EMAIL ? "✅ Set" : "❌ Missing"
+    );
+    console.log(
+      "SECRET_FIREBASE_CLIENT_ID:",
+      process.env.SECRET_FIREBASE_CLIENT_ID ? "✅ Set" : "❌ Missing"
+    );
+    console.log(
+      "SECRET_FIREBASE_CLIENT_X509_CERT_URL:",
+      process.env.SECRET_FIREBASE_CLIENT_X509_CERT_URL ? "✅ Set" : "❌ Missing"
+    );
+
     // Validate API key
     if (!validateApiKey(request)) {
       return NextResponse.json(
