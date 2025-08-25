@@ -1,11 +1,11 @@
-import { Box, Text } from "@mantine/core";
+import { Flex, Text } from "@mantine/core";
 
 export default function Footer() {
   return (
-    <Box>
+    <Flex mt={"40px"}>
       <Text c={"#fff"} size="16px">
-        Footer
+        © 2025 Elementle
       </Text>
-    </Box>
+    </Flex>
   );
 }

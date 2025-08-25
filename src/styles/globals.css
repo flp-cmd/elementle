@@ -17,6 +17,12 @@ body {
   min-height: 100vh;
 }
 
+/* Ensure responsive text wrapping */
+* {
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
 body {
   color: var(--foreground);
   background-image: url("/background.jpg");

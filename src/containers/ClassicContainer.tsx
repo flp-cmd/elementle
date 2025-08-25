@@ -7,14 +7,23 @@ export default function ClassicContainer() {
   return (
     <Flex
       direction={"column"}
-      justify={"space-between"}
       align={"center"}
-      h={"100vh"}
-      px={"60px"}
-      py={"100px"}
+      mih={"100vh"}
+      px={{ base: "10px", md: "60px" }}
+      py={"40px"}
+      justify={"space-between"}
+      maw={"1200px"}
+      mx={"auto"}
+      w={"100%"}
     >
-      <Header />
-      <ClassicContent />
+      <Flex
+        direction={"column"}
+        align={"center"}
+        gap={{ base: "30px", md: "30px" }}
+      >
+        <Header />
+        <ClassicContent />
+      </Flex>
       <Footer />
     </Flex>
   );

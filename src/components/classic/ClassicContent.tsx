@@ -84,33 +84,42 @@ export default function ClassicContent() {
   };
 
   return (
-    <Box w="100%" maw="450px" mx="auto">
+    <Box w="100%" maw={{ base: "100%", sm: "450px" }} mx="auto">
       <Box
-        bg="white"
-        p="xl"
+        p={{ base: "md", md: "xl" }}
         style={{
           borderRadius: "12px",
           boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
         }}
-        mb="xl"
       >
-        <Text size="24px" fw={700} ta="center" c="#333" mb="md">
+        <Text
+          fw={700}
+          ta="center"
+          c="#fff"
+          mb="md"
+          style={{ fontSize: "clamp(18px, 4vw, 24px)" }}
+        >
           Adivinhe o elemento de hoje
         </Text>
-        <Text size="sm" ta="center" c="#666" mb="lg">
+        <Text
+          ta="center"
+          c="#fff"
+          mb="lg"
+          style={{ fontSize: "clamp(12px, 2.5vw, 14px)" }}
+        >
           Digite qualquer elemento para começar
         </Text>
 
         {!gameWon && (
           <Box
-            bg="#f0f8ff"
-            p="lg"
+            bg="#dee1e4"
+            p={{ base: "md" }}
             style={{
               borderRadius: "8px",
-              border: "2px solid #bfdbfe",
+              border: "2px solid #0c2a4e",
             }}
           >
-            <Flex gap="md" align="center">
+            <Flex gap={{ base: "sm", md: "lg" }} align="center" direction="row">
               <Autocomplete
                 placeholder="Digite o nome do elemento..."
                 value={guess}
@@ -130,7 +139,7 @@ export default function ClassicContent() {
                 }
                 filter={optionsFilter}
                 limit={5}
-                w="280px"
+                w={"100%"}
                 styles={{
                   input: {
                     backgroundColor: "white",
@@ -185,7 +194,13 @@ export default function ClassicContent() {
       </Box>
 
       {gameWon && (
-        <Text size="lg" fw={600} ta="center" c="green" mb="xl">
+        <Text
+          fw={600}
+          ta="center"
+          c="green"
+          mb={{ base: "md", sm: "lg", md: "xl" }}
+          style={{ fontSize: "clamp(16px, 3vw, 20px)" }}
+        >
           🎉 Parabéns! Você acertou! O elemento era {targetElement?.name}!
         </Text>
       )}
@@ -193,84 +208,108 @@ export default function ClassicContent() {
       <Box>
         {/* Header com nomes das propriedades - apenas se houver tentativas */}
         {guesses.length > 0 && (
-          <Flex gap="sm" mb="xs">
+          <Box
+            style={{
+              display: "grid",
+              gridTemplateColumns: `repeat(5, 1fr)`,
+              gap: "3px",
+              marginBottom: "8px",
+            }}
+          >
             <Flex
-              flex={1}
-              p="sm"
-              pb="xs"
               style={{
                 borderBottom: "solid 2px #000",
               }}
+              p={{ base: "xs", sm: "sm" }}
+              pb="xs"
               justify={"center"}
               align={"center"}
             >
-              <Text size="sm" fw={600} ta="center" c="white">
+              <Text
+                fw={600}
+                ta="center"
+                c="white"
+                style={{ fontSize: "clamp(10px, 2vw, 14px)" }}
+              >
                 Elemento
               </Text>
             </Flex>
             {guesses[0].results.map((result, resultIndex) => (
               <Flex
                 key={resultIndex}
-                flex={1}
-                p="sm"
-                pb="xs"
                 style={{
                   borderBottom: "solid 2px #000",
                 }}
+                p={{ base: "xs", sm: "sm" }}
+                pb="xs"
                 justify={"center"}
                 align={"center"}
               >
-                <Text size="sm" fw={600} ta="center" c="white">
+                <Text
+                  fw={600}
+                  ta="center"
+                  c="white"
+                  style={{ fontSize: "clamp(10px, 2vw, 14px)" }}
+                >
                   {formatProperty(result.property)}
                 </Text>
               </Flex>
             ))}
-          </Flex>
+          </Box>
         )}
 
-        {guesses.map((guessItem, index) => (
-          <Box key={index} mb="md">
-            <Flex gap="sm">
-              <Box
-                flex={1}
-                p="md"
-                h="80px"
-                style={{
-                  backgroundColor: "#374151",
-                  borderRadius: "8px",
-                  textAlign: "center",
-                  position: "relative",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
+        {[...guesses].reverse().map((guessItem, index) => (
+          <Box key={index} mb={{ base: "sm", sm: "md" }}>
+            <Box
+              style={{
+                display: "grid",
+                gridTemplateColumns: `repeat(5, 1fr)`,
+                gap: "3px",
+              }}
+            >
+              <Flex
+                p={{ base: "xs", sm: "sm", md: "md" }}
+                h={{ base: "60px", sm: "70px", md: "80px" }}
+                ta={"center"}
+                pos={"relative"}
+                direction={"column"}
+                justify={"center"}
+                align={"center"}
+                bg={"#374151"}
+                bd={"1px solid #ffffffb5"}
               >
-                <Text size="sm" c="white" fw={600}>
+                <Text
+                  c="white"
+                  fw={600}
+                  style={{ fontSize: "clamp(10px, 2vw, 14px)" }}
+                >
                   {guessItem.element.name.toUpperCase()}
                 </Text>
-                <Text size="xs" c="white" opacity={0.8}>
+                <Text
+                  c="white"
+                  opacity={0.8}
+                  style={{ fontSize: "clamp(8px, 1.5vw, 12px)" }}
+                >
                   ({guessItem.element.symbol})
                 </Text>
-              </Box>
+              </Flex>
               {guessItem.results.map((result, resultIndex) => (
-                <Box
+                <Flex
                   key={resultIndex}
-                  flex={1}
-                  p="md"
-                  h="80px"
-                  style={{
-                    backgroundColor: getStatusColor(result.status),
-                    borderRadius: "8px",
-                    textAlign: "center",
-                    position: "relative",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
+                  p={{ base: "xs", sm: "sm", md: "md" }}
+                  h={{ base: "60px", sm: "70px", md: "80px" }}
+                  bg={getStatusColor(result.status)}
+                  ta={"center"}
+                  pos={"relative"}
+                  direction={"column"}
+                  justify={"center"}
+                  align={"center"}
+                  bd={"1px solid #ffffffb5"}
                 >
-                  <Text size="sm" c="white">
+                  <Text
+                    c="white"
+                    style={{ fontSize: "clamp(10px, 2vw, 14px)" }}
+                  >
                     {formatValue(
                       result.property,
                       result.property === "group_name"
@@ -283,13 +322,17 @@ export default function ClassicContent() {
                     )}
                   </Text>
                   {result.direction && (
-                    <Text size="lg" c="white" mt="xs">
+                    <Text
+                      c="white"
+                      mt="xs"
+                      style={{ fontSize: "clamp(16px, 3vw, 24px)" }}
+                    >
                       {result.direction === "higher" ? "↑" : "↓"}
                     </Text>
                   )}
-                </Box>
+                </Flex>
               ))}
-            </Flex>
+            </Box>
           </Box>
         ))}
       </Box>
