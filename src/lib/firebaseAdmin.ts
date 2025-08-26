@@ -12,17 +12,6 @@ const serviceAccount = JSON.parse(
   process.env.SECRET_FIREBASE_SERVICE_ACCOUNT_JSON
 );
 
-// Debug: Check if private_key exists and has proper format
-console.log("Service Account Debug:");
-console.log("Has private_key:", !!serviceAccount.private_key);
-console.log(
-  "Private key starts with:",
-  serviceAccount.private_key?.substring(0, 30)
-);
-console.log("Private key ends with:", serviceAccount.private_key?.slice(-30));
-console.log("Private key length:", serviceAccount.private_key?.length);
-
-// Fix private_key format if needed (replace escaped newlines with actual newlines)
 if (serviceAccount.private_key) {
   serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
 }
@@ -31,7 +20,7 @@ const app =
   getApps().length === 0
     ? initializeApp({
         credential: cert(serviceAccount as Record<string, unknown>),
-        projectId: process.env.SECRET_FIREBASE_PROJECT_ID,
+        projectId: serviceAccount.project_id,
       })
     : getApps()[0];
 

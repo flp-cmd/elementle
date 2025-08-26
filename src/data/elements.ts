@@ -1702,8 +1702,27 @@ export function getElementById(id: number): ChemicalElement | undefined {
 export function findElementByName(name: string): ChemicalElement | undefined {
   const normalizedSearch = normalizeText(name);
 
-  return elements.find((element) => {
+  // First, try to find exact matches or elements that start with the search term
+  const exactMatch = elements.find((element) => {
     const normalizedElementName = normalizeText(element.name);
-    return normalizedElementName.includes(normalizedSearch);
+    return (
+      normalizedElementName === normalizedSearch ||
+      normalizedElementName.startsWith(normalizedSearch)
+    );
   });
+
+  if (exactMatch) {
+    return exactMatch;
+  }
+
+  // If no exact match, try to find elements that contain the search term
+  // but only if the search term is at least 2 characters long
+  if (normalizedSearch.length >= 2) {
+    return elements.find((element) => {
+      const normalizedElementName = normalizeText(element.name);
+      return normalizedElementName.includes(normalizedSearch);
+    });
+  }
+
+  return undefined;
 }
