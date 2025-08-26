@@ -1,17 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import {
-  Box,
-  Text,
-  ActionIcon,
-  Flex,
-  Autocomplete,
-  OptionsFilter,
-} from "@mantine/core";
-import { ChemicalElement, GuessResult } from "@/types/element";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Box, Text, ActionIcon, Flex, Autocomplete } from "@mantine/core";
+import { ChemicalElement } from "@/types/element";
 import { findElementByName, elements } from "@/data/elements";
-import { getDailyElement } from "@/lib/dailyElementService";
+import { useGuessesStorage } from "@/hooks/useGuessesStorage";
+import { createOptionsFilter } from "@/utils/textUtils";
 import { FaArrowRight } from "react-icons/fa";
 import {
   formatProperty,
@@ -19,79 +13,74 @@ import {
   getStatusColor,
 } from "@/utils/ClassicUtils";
 import { compareElements } from "@/utils/elementUtils";
-import { normalizeText } from "@/utils/textUtils";
 
 export default function ClassicContent() {
   const [targetElement, setTargetElement] = useState<ChemicalElement | null>(
     null
   );
   const [guess, setGuess] = useState("");
-  const [guesses, setGuesses] = useState<
-    Array<{ element: ChemicalElement; results: GuessResult[] }>
-  >([]);
-  const [gameWon, setGameWon] = useState(false);
-
-  const loadDailyElement = useCallback(async () => {
-    const dailyElement = await getDailyElement();
-    if (dailyElement) {
-      setTargetElement(dailyElement);
-    } else {
-      console.error("Failed to load daily element");
-    }
-  }, []);
+  const { guesses, setGuesses, gameWon, setGameWon } = useGuessesStorage();
 
   useEffect(() => {
-    loadDailyElement();
-  }, [loadDailyElement]);
-
-  const handleSubmit = useCallback(() => {
-    if (!guess.trim() || !targetElement) return;
-
-    const guessedElement = findElementByName(guess.trim());
-    if (!guessedElement) {
-      return;
-    }
-
-    const alreadyGuessed = guesses.some(
-      (guess) => guess.element.name === guessedElement.name
-    );
-    if (alreadyGuessed) {
-      setGuess("");
-      return;
-    }
-
-    const results = compareElements(guessedElement, targetElement);
-    setGuesses((prev) => [...prev, { element: guessedElement, results }]);
-
-    if (
-      guessedElement.name.toLowerCase() === targetElement.name.toLowerCase()
-    ) {
-      setGameWon(true);
-    }
-
-    setGuess("");
-  }, [guess, targetElement, guesses]);
-
-  const optionsFilter: OptionsFilter = ({ options, search }) => {
-    const normalizedSearch = normalizeText(search);
-    return options.filter((option) => {
-      if ("label" in option) {
-        const normalizedOption = normalizeText(option.label);
-        return normalizedOption.includes(normalizedSearch);
+    const loadElement = async () => {
+      try {
+        // Import the function directly instead of calling the hook
+        const { useDailyElement: getDailyElement } = await import(
+          "@/hooks/useDailyElement"
+        );
+        const dailyElement = await getDailyElement();
+        if (dailyElement) {
+          setTargetElement(dailyElement);
+        } else {
+          console.error("Failed to load daily element");
+        }
+      } catch (error) {
+        console.error("Error loading daily element:", error);
       }
-      return false;
-    });
-  };
+    };
+
+    loadElement();
+  }, []);
+
+  const handleSubmit = useCallback(
+    (value?: string) => {
+      console.log("Enter Handle Submit");
+      const searchValue = value || guess;
+
+      if (!searchValue.trim() || !targetElement) return;
+
+      const guessedElement = findElementByName(searchValue.trim());
+      if (!guessedElement) {
+        return;
+      }
+
+      const alreadyGuessed = guesses.some(
+        (guess) => guess.element.name === guessedElement.name
+      );
+      if (alreadyGuessed) {
+        setGuess("");
+        return;
+      }
+
+      const results = compareElements(guessedElement, targetElement);
+      setGuesses((prev) => [...prev, { element: guessedElement, results }]);
+
+      if (
+        guessedElement.name.toLowerCase() === targetElement.name.toLowerCase()
+      ) {
+        setGameWon(true);
+      }
+
+      setGuess("");
+    },
+    [guess, targetElement, guesses, setGuesses, setGameWon]
+  );
+
+  const optionsFilter = useMemo(() => createOptionsFilter(), []);
 
   return (
     <Box w="100%" maw={{ base: "100%", sm: "450px" }} mx="auto">
-      <Box
-        p={{ base: "md", md: "xl" }}
-        style={{
-          borderRadius: "12px",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-        }}
-      >
+      <Box p={{ base: "md", md: "xl" }}>
         <Text
           fw={700}
           ta="center"
@@ -125,6 +114,10 @@ export default function ClassicContent() {
                 value={guess}
                 onChange={setGuess}
                 onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                onOptionSubmit={(value: string) => {
+                  handleSubmit(value);
+                }}
+                clearable
                 data={
                   guess.trim().length > 0
                     ? elements
@@ -169,7 +162,7 @@ export default function ClassicContent() {
                 }}
               />
               <ActionIcon
-                onClick={handleSubmit}
+                onClick={() => handleSubmit()}
                 size="lg"
                 variant="filled"
                 color="blue"

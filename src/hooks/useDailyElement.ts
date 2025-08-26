@@ -68,7 +68,7 @@ async function fetchDailyElementFromAPI(): Promise<DailyElementResponse> {
 }
 
 // Main function to get today's daily element
-export async function getDailyElement(): Promise<ChemicalElement | null> {
+export async function useDailyElement(): Promise<ChemicalElement | null> {
   try {
     // Check cache first
     const cached = getCachedDailyElement();
