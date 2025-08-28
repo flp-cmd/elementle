@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Box, Text, ActionIcon, Flex, Autocomplete } from "@mantine/core";
-import { ChemicalElement } from "@/types/element";
-import { findElementByName, elements } from "@/data/elements";
-import { useGuessesStorage } from "@/hooks/useGuessesStorage";
+import { ChemicalElement, DailyElementResponse } from "@/types/element";
+import { findElementByName, elements, getElementById } from "@/data/elements";
 import { createOptionsFilter } from "@/utils/textUtils";
 import { FaArrowRight } from "react-icons/fa";
 import {
@@ -13,38 +12,40 @@ import {
   getStatusColor,
 } from "@/utils/ClassicUtils";
 import { compareElements } from "@/utils/elementUtils";
+import { useQuery } from "@tanstack/react-query";
+import { useGuessesStorage } from "@/hooks/useGuessesStorage";
 
 export default function ClassicContent() {
-  const [targetElement, setTargetElement] = useState<ChemicalElement | null>(
-    null
-  );
   const [guess, setGuess] = useState("");
-  const { guesses, setGuesses, gameWon, setGameWon } = useGuessesStorage();
+  const { guesses, setGuesses, gameWon, setGameWon } =
+    useGuessesStorage();
 
-  useEffect(() => {
-    const loadElement = async () => {
-      try {
-        // Import the function directly instead of calling the hook
-        const { useDailyElement: getDailyElement } = await import(
-          "@/hooks/useDailyElement"
-        );
-        const dailyElement = await getDailyElement();
-        if (dailyElement) {
-          setTargetElement(dailyElement);
-        } else {
-          console.error("Failed to load daily element");
-        }
-      } catch (error) {
-        console.error("Error loading daily element:", error);
+  // Get today's date as string (YYYY-MM-DD format)
+  const today = new Date().toISOString().split("T")[0];
+
+  const { data: targetElement } = useQuery({
+    queryKey: ["daily-element", today],
+    queryFn: async (): Promise<ChemicalElement | undefined> => {
+      const response = await fetch("/api/daily-element", {
+        method: "GET",
+        headers: {
+          "x-api-key": process.env.NEXT_PUBLIC_DAILY_ELEMENT_API_KEY || "",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
 
-    loadElement();
-  }, []);
+      const responseData: DailyElementResponse = await response.json();
+      return getElementById(responseData.data.elementId);
+    },
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+    gcTime: 24 * 60 * 60 * 1000, // Keep in cache for 24 hours
+  });
 
   const handleSubmit = useCallback(
     (value?: string) => {
-      console.log("Enter Handle Submit");
       const searchValue = value || guess;
 
       if (!searchValue.trim() || !targetElement) return;
@@ -80,7 +81,7 @@ export default function ClassicContent() {
 
   return (
     <Box w="100%" maw={{ base: "100%", sm: "450px" }} mx="auto">
-      <Box p={{ base: "md", md: "xl" }}>
+      <Box p={0}>
         <Text
           fw={700}
           ta="center"

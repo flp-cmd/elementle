@@ -55,7 +55,6 @@ function cacheGuesses(
 export function clearCachedGuesses(): void {
   try {
     localStorage.removeItem(GUESSES_CACHE_KEY);
-    console.log("Cleared cached guesses");
   } catch (error) {
     console.error("Error clearing cached guesses:", error);
   }
@@ -73,11 +72,6 @@ export function useGuessesStorage() {
     if (cachedData) {
       setGuesses(cachedData.guesses);
       setGameWon(cachedData.gameWon);
-      console.log(
-        "Loaded cached guesses:",
-        cachedData.guesses.length,
-        "guesses"
-      );
     }
   }, []);
 
@@ -85,12 +79,6 @@ export function useGuessesStorage() {
   useEffect(() => {
     if (guesses.length > 0 || gameWon) {
       cacheGuesses(guesses, gameWon);
-      console.log(
-        "Cached guesses:",
-        guesses.length,
-        "guesses, game won:",
-        gameWon
-      );
     }
   }, [guesses, gameWon]);
 

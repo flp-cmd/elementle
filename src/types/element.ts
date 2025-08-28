@@ -14,3 +14,19 @@ export interface GuessResult {
   status: "correct" | "partial" | "wrong";
   direction?: "higher" | "lower";
 }
+
+export interface DailyElementResponse {
+  success: boolean;
+  data: {
+    elementId: number;
+    date: string;
+  };
+  error?: string;
+}
+
+export interface DailyElementCache {
+  elementId: number;
+  date: string;
+  element: ChemicalElement;
+}
+

@@ -19,7 +19,7 @@ export default function ClassicContainer() {
       <Flex
         direction={"column"}
         align={"center"}
-        gap={{ base: "30px", md: "30px" }}
+        gap={"10px"}
       >
         <Header />
         <ClassicContent />
