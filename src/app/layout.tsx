@@ -1,14 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../styles/globals.css";
-import "@mantine/core/styles.css";
-
-import {
-  ColorSchemeScript,
-  MantineProvider,
-  mantineHtmlProps,
-} from "@mantine/core";
-import QueryProvider from "@/components/core/QueryProvider";
+import Providers from "@/components/core/Providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" {...mantineHtmlProps}>
+    <html lang="en">
       <head>
         <link
           rel="apple-touch-icon"
@@ -51,12 +44,9 @@ export default function RootLayout({
           href="/favicon-16x16.png"
         />
         <link rel="manifest" href="/site.webmanifest" />
-        <ColorSchemeScript />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <MantineProvider>
-          <QueryProvider>{children}</QueryProvider>
-        </MantineProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

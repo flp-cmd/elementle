@@ -1,3 +1,5 @@
+"use client";
+
 import { Box, Image } from "@mantine/core";
 
 export default function Header() {

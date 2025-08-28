@@ -17,8 +17,8 @@ import { useGuessesStorage } from "@/hooks/useGuessesStorage";
 
 export default function ClassicContent() {
   const [guess, setGuess] = useState("");
-  const { guesses, setGuesses, gameWon, setGameWon } =
-    useGuessesStorage();
+
+  const { guesses, setGuesses, gameWon, setGameWon } = useGuessesStorage();
 
   // Get today's date as string (YYYY-MM-DD format)
   const today = new Date().toISOString().split("T")[0];
