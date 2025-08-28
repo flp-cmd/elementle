@@ -1,3 +1,5 @@
+"use client";
+
 import ClassicContent from "@/components/classic/ClassicContent";
 import Footer from "@/components/common/Footer";
 import Header from "@/components/common/Header";
@@ -16,11 +18,7 @@ export default function ClassicContainer() {
       mx={"auto"}
       w={"100%"}
     >
-      <Flex
-        direction={"column"}
-        align={"center"}
-        gap={{ base: "30px", md: "30px" }}
-      >
+      <Flex direction={"column"} align={"center"} gap={"10px"}>
         <Header />
         <ClassicContent />
       </Flex>
